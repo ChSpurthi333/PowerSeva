@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" data-title="Report a Fault">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PowerSeva</title>
+  <meta name="description" content="PowerSeva - report electricity faults and track every repair.">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/vendor/leaflet.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="content">
+        <div class="card" style="max-width:780px" id="form-wrap">
+          <h2 data-i18n="Report an electricity fault">Report an electricity fault</h2>
+          <p class="muted mb" data-i18n="Give as much detail as you can so the crew can find and fix it quickly. If a wire is live or a pole has fallen, keep people away and call the emergency helpline too.">Give as much detail as you can so the crew can find and fix it quickly. If a wire is live or a pole has fallen, keep people away and call the emergency helpline too.</p>
+          <form id="fault-form" enctype="multipart/form-data" novalidate>
+            <div class="form-group">
+              <label for="fault_type_id" data-i18n="Fault type">Fault type</label>
+              <select id="fault_type_id" name="fault_type_id"><option value="" data-i18n="Loading...">Loading...</option></select>
+              <div class="hint" id="fault-hint"></div>
+              <div class="error-text" id="fault_type_id-err"></div>
+            </div>
+            <div class="emergency-box hidden" id="emergency-box" role="alert"></div>
+            <div class="form-group">
+              <label for="title" data-i18n="Short title">Short title</label>
+              <input id="title" name="title" maxlength="150" data-voice data-i18n-placeholder="For example: No power since morning" placeholder="For example: No power since morning">
+              <div class="error-text" id="title-err"></div>
+            </div>
+            <div class="form-group">
+              <label for="description" data-i18n="Describe the problem">Describe the problem</label>
+              <textarea id="description" name="description" data-voice data-i18n-placeholder="What happened? Since when? Is anyone in danger?" placeholder="What happened? Since when? Is anyone in danger?"></textarea>
+              <div class="error-text" id="description-err"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="location_address" data-i18n="Fault location or address">Fault location or address</label>
+                <input id="location_address" name="location_address" maxlength="255" data-voice>
+                <div class="error-text" id="location_address-err"></div>
+              </div>
+              <div class="form-group">
+                <label for="landmark" data-i18n="Nearby landmark (optional)">Nearby landmark (optional)</label>
+                <input id="landmark" name="landmark" maxlength="150" data-voice>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="area" data-i18n="Village / town / area">Village / town / area</label>
+              <input id="area" name="area" list="area-list" maxlength="100" data-voice>
+              <datalist id="area-list"></datalist>
+              <div class="hint" data-i18n="Used to send the nearest technician and to warn people nearby.">Used to send the nearest technician and to warn people nearby.</div>
+            </div>
+            <div class="form-group hidden" id="phone-group">
+              <label for="phone" data-i18n="Your phone number (so the technician can call you)">Your phone number (so the technician can call you)</label>
+              <input id="phone" name="phone" type="tel" inputmode="tel">
+              <div class="error-text" id="phone-err"></div>
+            </div>
+            <div class="form-group">
+              <label data-i18n="Mark the fault on the map (click the map or use your location)">Mark the fault on the map (click the map or use your location)</label>
+              <div class="inline-row"><button type="button" class="btn btn-outline btn-sm" id="geo-btn" data-i18n="Use my current location">Use my current location</button>
+              <span class="muted" id="geo-status"></span></div>
+              <div id="fault-map" class="map"></div>
+              <input type="hidden" id="latitude" name="latitude">
+              <input type="hidden" id="longitude" name="longitude">
+            </div>
+            <div class="form-group">
+              <label for="images" data-i18n="Photos (optional, up to 5, max 5 MB each)">Photos (optional, up to 5, max 5 MB each)</label>
+              <input type="file" id="images" name="images" accept="image/*" multiple>
+              <div class="preview-row" id="preview"></div>
+            </div>
+            <button class="btn" id="submit-btn" type="submit" data-i18n="Submit Complaint">Submit Complaint</button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="/js/lang-te.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/validation.js"></script>
+  <script src="/assets/vendor/leaflet.js"></script>
+  <script src="/assets/vendor/leaflet-heat.js"></script>
+  <script src="/js/map.js"></script>
+  <script src="/js/complaints.js"></script>
+  <script src="/js/citizen.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', Citizen.reportFault);</script>
+</body>
+</html>

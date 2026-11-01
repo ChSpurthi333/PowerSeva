@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-title="Register">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PowerSeva</title>
+  <meta name="description" content="PowerSeva - report electricity faults and track every repair.">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap">
+</head>
+<body>
+  <div class="auth-page">
+    <section class="auth-side">
+      <svg class="powerlines" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="1.4">
+      <path d="M-40 120 Q 150 215 340 128 Q 530 220 720 132 Q 910 215 1100 120 Q 1200 165 1300 126"/>
+      <path d="M-40 150 Q 150 245 340 158 Q 530 250 720 162 Q 910 245 1100 150 Q 1200 195 1300 156"/>
+      <path d="M-40 180 Q 150 275 340 188 Q 530 280 720 192 Q 910 275 1100 180 Q 1200 225 1300 186"/>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="3">
+      <path d="M340 90 V 640 M300 118 H 380 M308 148 H 372 M316 178 H 364"/>
+      <path d="M720 94 V 640 M680 122 H 760 M688 152 H 752 M696 182 H 744"/>
+      <path d="M1100 82 V 640 M1060 110 H 1140 M1068 140 H 1132 M1076 170 H 1124"/>
+    </g>
+  </svg>
+      <a class="logo" href="/index.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13.5,2 4,14 11,14 9.5,22 20,9.5 13,9.5"/></svg></span>PowerSeva</a>
+      <h1 data-i18n="Create your citizen account">Create your citizen account</h1>
+      <p data-i18n="Report electricity faults in your area and follow each repair until it is fixed.">Report electricity faults in your area and follow each repair until it is fixed.</p>
+      <ul>
+        <li data-i18n="Free, and takes about a minute">Free, and takes about a minute</li>
+        <li data-i18n="Photos and location supported">Photos and location supported</li>
+        <li data-i18n="Works in English and Telugu">Works in English and Telugu</li>
+      </ul>
+    </section>
+
+    <section class="auth-main">
+      <div class="auth-top"><a href="/index.html" data-i18n="Back to home">Back to home</a><div class="lang-slot"></div></div>
+      <div class="auth-center">
+        <div class="auth-card card">
+          <h2 data-i18n="Create account">Create account</h2>
+          <p class="sub" data-i18n="Technician and admin accounts are created by the department.">Technician and admin accounts are created by the department.</p>
+          <div id="form-alert" role="alert"></div>
+          <div id="google-btn"></div>
+          <div class="divider" data-i18n="or register with email">or register with email</div>
+          <form id="register-form" novalidate>
+            <div class="form-group">
+              <label for="full_name" data-i18n="Full name">Full name</label>
+              <input id="full_name" autocomplete="name" data-voice>
+              <div class="error-text" id="full_name-err"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email" data-i18n="Gmail address">Gmail address</label>
+                <input type="email" id="email" autocomplete="email" placeholder="yourname@gmail.com">
+                <div class="error-text" id="email-err"></div>
+              </div>
+              <div class="form-group">
+                <label for="phone" data-i18n="Phone number">Phone number</label>
+                <input id="phone" type="tel" inputmode="tel" autocomplete="tel">
+                <div class="error-text" id="phone-err"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="address" data-i18n="Address (optional)">Address (optional)</label>
+              <input id="address" autocomplete="street-address" data-voice>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="password" data-i18n="Password">Password</label>
+                <input type="password" id="password" autocomplete="new-password">
+                <div class="error-text" id="password-err"></div>
+              </div>
+              <div class="form-group">
+                <label for="confirm" data-i18n="Confirm password">Confirm password</label>
+                <input type="password" id="confirm" autocomplete="new-password">
+                <div class="error-text" id="confirm-err"></div>
+              </div>
+            </div>
+            <button class="btn btn-block" id="register-btn" type="submit" data-i18n="Register">Register</button>
+          </form>
+          <div class="auth-foot"><span data-i18n="Already registered?">Already registered?</span> <a href="/login.html" data-i18n="Login">Login</a></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/js/lang-te.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/validation.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', initRegister);</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-title="Home">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PowerSeva</title>
+  <meta name="description" content="PowerSeva - report electricity faults and track every repair.">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap">
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="logo" href="/index.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13.5,2 4,14 11,14 9.5,22 20,9.5 13,9.5"/></svg></span>PowerSeva</a>
+    <div class="links">
+      <div class="lang-slot"></div>
+      <a class="btn btn-outline btn-sm" href="/login.html" data-i18n="Login">Login</a>
+      <a class="btn btn-sm hide-sm" href="/register.html" data-i18n="Register">Register</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <svg class="powerlines" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="1.4">
+      <path d="M-40 120 Q 150 215 340 128 Q 530 220 720 132 Q 910 215 1100 120 Q 1200 165 1300 126"/>
+      <path d="M-40 150 Q 150 245 340 158 Q 530 250 720 162 Q 910 245 1100 150 Q 1200 195 1300 156"/>
+      <path d="M-40 180 Q 150 275 340 188 Q 530 280 720 192 Q 910 275 1100 180 Q 1200 225 1300 186"/>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="3">
+      <path d="M340 90 V 640 M300 118 H 380 M308 148 H 372 M316 178 H 364"/>
+      <path d="M720 94 V 640 M680 122 H 760 M688 152 H 752 M696 182 H 744"/>
+      <path d="M1100 82 V 640 M1060 110 H 1140 M1068 140 H 1132 M1076 170 H 1124"/>
+    </g>
+  </svg>
+    <div class="hero-inner">
+      <div>
+        <h1 data-i18n="Report a power fault. Follow it until it is fixed.">Report a power fault. Follow it until it is fixed.</h1>
+        <p class="lead" data-i18n="PowerSeva connects you with your electricity department. Send photos and your location, then see when a technician is assigned and when the repair is done.">PowerSeva connects you with your electricity department. Send photos and your location, then see when a technician is assigned and when the repair is done.</p>
+        <div class="cta">
+          <a class="btn btn-yellow" href="/register.html" data-i18n="Report a Fault">Report a Fault</a>
+          <a class="btn btn-ghost" href="/login.html" data-i18n="Track my complaint">Track my complaint</a>
+        </div>
+      </div>
+      <div class="tracker" aria-label="Example">
+        <span class="tag" data-i18n="Example of what you will see">Example of what you will see</span>
+        <h3 data-i18n="Wire hanging near the bus stop">Wire hanging near the bus stop</h3>
+        <div class="num"><span data-i18n="Complaint number">Complaint number</span> EFC-2026-000128</div>
+        <ol>
+          <li><span data-i18n="Fault reported">Fault reported</span><small>9:05 am</small></li>
+          <li><span data-i18n="Technician assigned">Technician assigned</span><small>9:40 am</small></li>
+          <li class="now"><span data-i18n="Repair in progress">Repair in progress</span><small>10:15 am</small></li>
+          <li class="todo"><span data-i18n="Confirmed by you">Confirmed by you</span></li>
+        </ol>
+      </div>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="wrap">
+      <h2 class="title" data-i18n="What you can do with PowerSeva">What you can do with PowerSeva</h2>
+      <p class="intro" data-i18n="One place for citizens, technicians and department officers.">One place for citizens, technicians and department officers.</p>
+      <div class="features">
+        <div class="feature"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><h3 data-i18n="Report with photos">Report with photos</h3><p data-i18n="Add up to five photos and your location so the crew can find the fault quickly.">Add up to five photos and your location so the crew can find the fault quickly.</p></div>
+        <div class="feature"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><h3 data-i18n="Follow every step">Follow every step</h3><p data-i18n="See when your complaint is received, assigned, repaired and closed.">See when your complaint is received, assigned, repaired and closed.</p></div>
+        <div class="feature"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><h3 data-i18n="Get notified">Get notified</h3><p data-i18n="You are told when a technician is assigned and when the work is finished.">You are told when a technician is assigned and when the work is finished.</p></div>
+        <div class="feature"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><h3 data-i18n="Proof of repair">Proof of repair</h3><p data-i18n="Technicians upload photos of the finished work, and you confirm that it is fixed.">Technicians upload photos of the finished work, and you confirm that it is fixed.</p></div>
+        <div class="feature"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h3 data-i18n="Delays are escalated">Delays are escalated</h3><p data-i18n="If a repair takes longer than expected, it is passed to a senior officer automatically.">If a repair takes longer than expected, it is passed to a senior officer automatically.</p></div>
+        <div class="feature"><svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg><h3 data-i18n="Reports for officers">Reports for officers</h3><p data-i18n="Officers see response times, technician workload and citizen ratings in one place.">Officers see response times, technician workload and citizen ratings in one place.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section village">
+    <div class="wrap">
+      <div>
+        <h2 class="title" data-i18n="Use PowerSeva in Telugu">Use PowerSeva in Telugu</h2>
+        <p class="intro" style="margin-bottom:0" data-i18n="Switch the whole site to Telugu with one tap. Press the microphone beside any box and speak, and your words are typed for you.">Switch the whole site to Telugu with one tap. Press the microphone beside any box and speak, and your words are typed for you.</p>
+      </div>
+      <div class="te-sample" aria-hidden="true">
+        <span class="muted" data-i18n="Example">Example</span>
+        <div class="field"><span>కరెంట్ స్తంభం దగ్గర వైరు తెగిపడింది</span><span class="mic"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background:#fff">
+    <div class="wrap">
+      <h2 class="title" data-i18n="How it works">How it works</h2>
+      <p class="intro" data-i18n="From the first report to a confirmed repair.">From the first report to a confirmed repair.</p>
+      <div class="steps">
+        <div class="step"><h3 data-i18n="Register">Register</h3><p data-i18n="Create your account with your Gmail address or with Google.">Create your account with your Gmail address or with Google.</p></div>
+        <div class="step"><h3 data-i18n="Report">Report</h3><p data-i18n="Describe the fault and add photos.">Describe the fault and add photos.</p></div>
+        <div class="step"><h3 data-i18n="Repair">Repair</h3><p data-i18n="A technician is assigned and fixes it.">A technician is assigned and fixes it.</p></div>
+        <div class="step"><h3 data-i18n="Confirm">Confirm</h3><p data-i18n="You check the repair and rate the service.">You check the repair and rate the service.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a class="logo" href="/index.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13.5,2 4,14 11,14 9.5,22 20,9.5 13,9.5"/></svg></span>PowerSeva</a>
+      <span data-i18n="If a wire has fallen, stay away from it and call your electricity helpline.">If a wire has fallen, stay away from it and call your electricity helpline.</span>
+    </div>
+  </footer>
+
+  <script src="/js/lang-te.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/validation.js"></script>
+</body>
+</html>

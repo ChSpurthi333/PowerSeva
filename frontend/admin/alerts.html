@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" data-title="Outage Alerts">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PowerSeva</title>
+  <meta name="description" content="PowerSeva - report electricity faults and track every repair.">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/vendor/leaflet.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="content">
+        <div class="empty" data-i18n="Loading...">Loading...</div>
+      </main>
+    </div>
+  </div>
+  <script src="/js/lang-te.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/validation.js"></script>
+  <script src="/assets/vendor/leaflet.js"></script>
+  <script src="/assets/vendor/leaflet-heat.js"></script>
+  <script src="/js/map.js"></script>
+  <script src="/js/complaints.js"></script>
+  <script src="/js/admin.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', Admin.alerts);</script>
+</body>
+</html>

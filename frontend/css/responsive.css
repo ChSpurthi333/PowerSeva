@@ -1,0 +1,46 @@
+/* ===== PowerSeva - tablet and phone adjustments ===== */
+@media (max-width: 1000px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+  .sidebar.open { transform: none; box-shadow: 0 0 40px rgba(11, 92, 173, 0.25); }
+  .main { margin-left: 0; }
+  .menu-btn { display: block; }
+  .report-grid { grid-template-columns: 1fr; }
+
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-side { padding: 28px 24px; }
+  .auth-side h1 { font-size: 1.6rem; }
+  .auth-side ul, .auth-side p { display: none; }
+  .auth-side .logo { margin-bottom: 14px; }
+
+  .hero-inner { grid-template-columns: 1fr; gap: 36px; }
+  .hero h1 { font-size: 2.1rem; }
+  .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .village .wrap { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 28px; }
+  .step:nth-child(2)::after { display: none; }
+}
+
+@media (max-width: 640px) {
+  .content { padding: 16px; }
+  .topbar { padding: 8px 12px; }
+  .form-row, .detail-grid { grid-template-columns: 1fr; }
+  .hero { padding: 44px 5vw 52px; }
+  .hero h1 { font-size: 1.75rem; }
+  .hero .btn { width: 100%; }
+  .features { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr; }
+  .step::after { display: none; }
+  .job-grid { grid-template-columns: 1fr; }
+  .notif-panel { right: 8px; left: 8px; width: auto; }
+  .bar-row { grid-template-columns: 100px 1fr 34px; }
+  .user-chip { display: none; }
+  .progress .step-dot { font-size: 0.7rem; }
+  .filters > * { max-width: none; }
+  .auth-main { padding: 14px 14px 28px; }
+  .auth-card { padding: 22px 18px; }
+  .site-nav { padding: 10px 4vw; }
+  .site-nav .links .hide-sm { display: none; }
+  .lang-switch button { padding: 6px 10px; }
+  .card { padding: 16px; }
+  .modal { padding: 20px 16px; }
+}
