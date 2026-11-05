@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const complaintRoutes = require('./routes/complaintRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const technicianRoutes = require('./routes/technicianRoutes');
+const { ensureSchema } = require('./services/migrate');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { escalateOverdueComplaints } = require('./services/complaintService');
 
@@ -41,7 +42,12 @@ app.use('/api/technician', technicianRoutes);
 app.use('/api', notFound);
 
 // The frontend is served by the same server -> open http://localhost:5000
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+app.use(express.static(path.join(__dirname, '..', 'frontend'), {
+  setHeaders: (res, file) => {
+    // The service worker and manifest must always be re-checked so app updates reach users
+    if (/[\\/](sw\.js|manifest\.webmanifest)$/.test(file)) res.set('Cache-Control', 'no-cache');
+  }
+}));
 
 app.use(errorHandler);
 
@@ -64,6 +70,7 @@ if (require.main === module) {
     try {
       await pool.query('SELECT 1 FROM users LIMIT 1');
       console.log('Database connection OK');
+      await ensureSchema();
     } catch (e) {
       console.error('\n*** DATABASE PROBLEM (' + (e.code || 'error') + ') ***');
       console.error(explainDbError(e) + '\n');

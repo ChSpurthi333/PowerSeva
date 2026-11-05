@@ -2,6 +2,7 @@ const pool = require('../config/db');
 const { httpError, asyncHandler } = require('../middleware/errorMiddleware');
 const generateComplaintId = require('../utils/generateComplaintId');
 const { changeStatus } = require('../services/complaintService');
+const { findNearby } = require('../services/duplicateService');
 const { notify, notifyAdmins } = require('../services/notificationService');
 const { PHONE_RE } = require('../utils/validators');
 const { assess } = require('../services/priorityService');
@@ -147,11 +148,13 @@ const create = asyncHandler(async (req, res) => {
 const myComplaints = asyncHandler(async (req, res) => {
   const [rows] = await pool.query(
     `SELECT c.complaint_id, c.complaint_number, c.title, c.priority, c.current_status, c.is_emergency, c.area,
-            c.reported_at, c.due_by, c.resolved_at, c.estimated_restoration, c.eta_source, ft.name AS fault_type
+            c.reported_at, c.due_by, c.resolved_at, c.estimated_restoration, c.eta_source, c.support_count,
+            ft.name AS fault_type, (c.citizen_id <> ?) AS is_supporter
        FROM complaints c JOIN fault_types ft ON ft.fault_type_id = c.fault_type_id
       WHERE c.citizen_id = ?
+         OR EXISTS (SELECT 1 FROM complaint_supporters s WHERE s.complaint_id = c.complaint_id AND s.citizen_id = ?)
       ORDER BY c.reported_at DESC`,
-    [req.user.id]
+    [req.user.id, req.user.id, req.user.id]
   );
   res.json(rows);
 });
@@ -203,23 +206,27 @@ async function loadComplaint(number) {
   return { complaint, images, history, assignments, evidence, updates, confirmation: confirmation[0] || null };
 }
 
-function checkAccess(req, complaint) {
-  if (req.user.role === 'citizen' && complaint.citizen_id !== req.user.id) {
-    throw httpError(403, 'You can only track your own complaints');
-  }
+// Citizens may see their own complaints and the ones they joined ("same problem")
+async function checkAccess(req, complaint) {
+  if (req.user.role !== 'citizen' || complaint.citizen_id === req.user.id) return;
+  const [rows] = await pool.query(
+    'SELECT 1 FROM complaint_supporters WHERE complaint_id = ? AND citizen_id = ?',
+    [complaint.complaint_id, req.user.id]
+  );
+  if (!rows.length) throw httpError(403, 'You can only track your own complaints');
 }
 
 // Full tracking details by complaint number
 const track = asyncHandler(async (req, res) => {
   const data = await loadComplaint(req.params.number);
-  checkAccess(req, data.complaint);
+  await checkAccess(req, data.complaint);
   res.json(data);
 });
 
 // PDF receipt: complaint ID, location, reported date, description and resolution details
 const receipt = asyncHandler(async (req, res) => {
   const data = await loadComplaint(req.params.number);
-  checkAccess(req, data.complaint);
+  await checkAccess(req, data.complaint);
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="PowerSeva-Receipt-${data.complaint.complaint_number}.pdf"`);
   buildReceipt(res, data);
@@ -305,7 +312,59 @@ const markNotificationsRead = asyncHandler(async (req, res) => {
   res.json({ message: 'Notifications marked as read' });
 });
 
+// Duplicate check: open complaints of the same fault type reported nearby (never shows other people's details)
+const duplicates = asyncHandler(async (req, res) => {
+  res.json(await findNearby(pool, { ...req.body, userId: req.user.id }));
+});
+
+// "I have the same problem": the citizen joins an existing complaint instead of filing a new one
+const support = asyncHandler(async (req, res) => {
+  const note = String(req.body.note || '').trim().slice(0, 255) || null;
+  const THRESHOLD = Number(process.env.DUP_BUMP_AT) || 3;
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [rows] = await conn.query(
+      'SELECT citizen_id, current_status, complaint_number, priority FROM complaints WHERE complaint_id = ? FOR UPDATE',
+      [req.params.id]
+    );
+    if (!rows.length) throw httpError(404, 'Complaint not found');
+    const c = rows[0];
+    if (c.citizen_id === req.user.id) throw httpError(400, 'This is your own complaint');
+    if (['closed', 'rejected', 'repaired'].includes(c.current_status)) throw httpError(400, 'This complaint is already resolved. Please submit a new complaint.');
+
+    const [ins] = await conn.query('INSERT IGNORE INTO complaint_supporters (complaint_id, citizen_id, note) VALUES (?, ?, ?)',
+      [req.params.id, req.user.id, note]);
+    if (!ins.affectedRows) throw httpError(409, 'You have already joined this complaint');
+
+    await conn.query('UPDATE complaints SET support_count = support_count + 1 WHERE complaint_id = ?', [req.params.id]);
+    const [[{ support_count: n }]] = await conn.query('SELECT support_count FROM complaints WHERE complaint_id = ?', [req.params.id]);
+
+    // Many citizens reporting the same fault means more people without power: raise a low / medium priority once
+    if (n === THRESHOLD && ['low', 'medium'].includes(c.priority)) {
+      await conn.query(
+        `UPDATE complaints SET priority = IF(priority = 'low', 'medium', 'high'), priority_reason = ?,
+                due_by = LEAST(COALESCE(due_by, DATE_ADD(NOW(), INTERVAL 24 HOUR)), DATE_ADD(NOW(), INTERVAL 12 HOUR))
+          WHERE complaint_id = ?`,
+        [`Reported by ${n + 1} citizens nearby`, req.params.id]);
+      await notifyAdmins(conn, Number(req.params.id), 'Complaint priority raised',
+        `${n + 1} citizens reported the same fault (${c.complaint_number}), so its priority was raised.`);
+    }
+    await notify(conn, c.citizen_id, Number(req.params.id), 'More people reported the same fault',
+      `Another citizen reported the same fault as your complaint ${c.complaint_number}. ${n + 1} people are now affected.`);
+    await notify(conn, req.user.id, Number(req.params.id), `You joined complaint ${c.complaint_number}`,
+      `We will send you every update on complaint ${c.complaint_number}. Track it with this number.`);
+    await conn.commit();
+    res.status(201).json({ message: 'Thank you! You will get updates on the existing complaint.', complaint_number: c.complaint_number });
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+});
+
 module.exports = {
   faultTypes, areas, assessComplaint, create, myComplaints, track, receipt, confirm, alerts,
-  notifications, markNotificationsRead
+  notifications, markNotificationsRead, duplicates, support
 };

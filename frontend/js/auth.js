@@ -120,3 +120,45 @@ function initRegister() {
     }
   });
 }
+
+function initForgot() {
+  document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ok = validateForm({
+      email: [[Validate.required, t('Email is required')], [Validate.gmail, t('Enter a valid Gmail address (example@gmail.com)')]]
+    });
+    if (!ok) return;
+    const btn = document.getElementById('forgot-btn');
+    btn.disabled = true;
+    try {
+      const data = await api('/auth/forgot-password', { method: 'POST', body: { email: document.getElementById('email').value } });
+      showFormAlert('success', data.message);
+    } catch (err) {
+      showFormAlert('error', err.message);
+    }
+    btn.disabled = false;
+  });
+}
+
+function initReset() {
+  const token = new URLSearchParams(location.search).get('token');
+  if (!token) showFormAlert('error', t('This reset link is invalid or has expired'));
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ok = validateForm({
+      password: [[(v) => Validate.minLen(v, 6), t('Password must be at least 6 characters')]],
+      confirm: [[(v) => v === document.getElementById('password').value, t('Passwords do not match')]]
+    });
+    if (!ok || !token) return;
+    const btn = document.getElementById('reset-btn');
+    btn.disabled = true;
+    try {
+      await api('/auth/reset-password', { method: 'POST', body: { token, password: document.getElementById('password').value } });
+      showFormAlert('success', t('Password updated. Redirecting to login...'));
+      setTimeout(() => (location.href = '/login.html'), 1500);
+    } catch (err) {
+      showFormAlert('error', err.message);
+      btn.disabled = false;
+    }
+  });
+}

@@ -6,6 +6,9 @@
   <title>PowerSeva</title>
   <meta name="description" content="PowerSeva - report electricity faults and track every repair.">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0a2540">
+  <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/auth.css">
   <link rel="stylesheet" href="/css/responsive.css">
@@ -55,6 +58,7 @@
               <label for="password" data-i18n="Password">Password</label>
               <input type="password" id="password" autocomplete="current-password">
               <div class="error-text" id="password-err"></div>
+              <div class="forgot-link"><a href="/forgot-password.html" data-i18n="Forgot password?">Forgot password?</a></div>
             </div>
             <button class="btn btn-block" id="login-btn" type="submit" data-i18n="Login">Login</button>
           </form>
@@ -76,5 +80,7 @@
   <script src="/js/validation.js"></script>
   <script src="/js/auth.js"></script>
   <script>document.addEventListener('DOMContentLoaded', initLogin);</script>
+  <script src="/js/password-toggle.js"></script>
+  <script src="/js/pwa.js"></script>
 </body>
 </html>

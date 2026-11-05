@@ -79,3 +79,5 @@
 .site-footer { background: #e9f2fb; border-top: 1px solid #d3e4f5; color: #43607c; padding: 28px 6vw; font-size: 0.92rem; }
 .site-footer .wrap { max-width: 1180px; margin: 0 auto; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
 .site-footer .logo { color: var(--ink); font-size: 1.05rem; }
+
+.forgot-link { text-align: right; margin-top: 6px; font-size: 0.9rem; }

@@ -28,7 +28,14 @@ async function api(path, opts = {}) {
   try {
     res = await fetch(API + path, { method: opts.method || 'GET', headers, body });
   } catch (e) {
-    throw new Error(t('Cannot reach the server. Is the backend running?'));
+    const err = new Error(t('Cannot reach the server. Is the backend running?'));
+    err.offline = true; // lets pages queue the action for later (offline mode)
+    // Read-only pages keep working offline with the last answer saved on this phone
+    if (!opts.method && window.PWA) {
+      const saved = PWA.recall(path);
+      if (saved !== undefined) { PWA.notifyStale(); return saved; }
+    }
+    throw err;
   }
   let data = null;
   try { data = await res.json(); } catch (e) { /* no body */ }
@@ -39,6 +46,7 @@ async function api(path, opts = {}) {
     throw new Error(t('Session expired'));
   }
   if (!res.ok) throw new Error(t((data && data.message) || 'Request failed'));
+  if (!opts.method && window.PWA) PWA.remember(path, data);
   return data;
 }
 
@@ -107,6 +115,7 @@ function requireRole(role) {
 
 function logout() {
   Auth.clear();
+  if (window.PWA) PWA.clearPrivateData();
   location.href = '/login.html';
 }
 
@@ -164,6 +173,7 @@ function renderLayout(role, title) {
       <button class="bell" id="bell" aria-label="${esc(t('Notifications'))}">${BELL_SVG}<span class="count hidden" id="bell-count">0</span></button>
       ${role === 'admin' ? `<div class="user-chip"><b>${esc(user.name)}</b>${esc(label(role))}</div>`
         : `<button class="user-chip as-button" id="profile-btn" title="${esc(t('My profile'))}"><b>${esc(user.name)}</b>${esc(label(role))}</button>`}
+      ${role === 'admin' ? `<button class="btn btn-outline btn-sm" id="pw-btn" title="${esc(t('Change password'))}" aria-label="${esc(t('Change password'))}">&#128273;</button>` : ''}
       <button class="btn btn-outline btn-sm" id="logout-btn">${esc(t('Logout'))}</button>
     </div>`;
 
@@ -171,6 +181,8 @@ function renderLayout(role, title) {
   document.getElementById('menu-btn').addEventListener('click', () =>
     document.getElementById('sidebar').classList.toggle('open'));
   document.getElementById('logout-btn').addEventListener('click', logout);
+  const pwb = document.getElementById('pw-btn');
+  if (pwb) pwb.addEventListener('click', openChangePassword);
   const pb = document.getElementById('profile-btn');
   if (pb) pb.addEventListener('click', () => openProfile());
   document.getElementById('bell').addEventListener('click', toggleNotifications);
@@ -217,6 +229,43 @@ document.addEventListener('click', (e) => {
   const panel = document.getElementById('notif-panel');
   if (panel && !panel.contains(e.target) && !e.target.closest('#bell')) panel.remove();
 });
+
+/* ----- Change password (profile page for citizens / technicians, key button for admins) ----- */
+function openChangePassword() {
+  const body = openModal(`
+    <h2>${esc(t('Change password'))}</h2>
+    <form id="cp-form" novalidate>
+      <div class="form-group"><label for="cp-old">${esc(t('Current password'))}</label>
+        <input type="password" id="cp-old" autocomplete="current-password"><div class="error-text" id="cp-old-err"></div></div>
+      <div class="form-group"><label for="cp-new">${esc(t('New password'))}</label>
+        <input type="password" id="cp-new" autocomplete="new-password"><div class="error-text" id="cp-new-err"></div>
+        <div class="hint">${esc(t('At least 6 characters.'))}</div></div>
+      <div class="form-group"><label for="cp-confirm">${esc(t('Confirm new password'))}</label>
+        <input type="password" id="cp-confirm" autocomplete="new-password"><div class="error-text" id="cp-confirm-err"></div></div>
+      <p class="muted">${esc(t('Signed up with Google and never set a password? Log out and use "Forgot password?" to create one.'))}</p>
+      <button class="btn" id="cp-save" type="submit">${esc(t('Update password'))}</button>
+    </form>`);
+  const f = (id) => body.querySelector('#' + id);
+  body.querySelector('#cp-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errs = {
+      'cp-old': f('cp-old').value ? '' : t('Enter your current password'),
+      'cp-new': f('cp-new').value.length >= 6 ? '' : t('Password must be at least 6 characters'),
+      'cp-confirm': f('cp-confirm').value === f('cp-new').value ? '' : t('Passwords do not match')
+    };
+    Object.keys(errs).forEach((k) => { f(k + '-err').textContent = errs[k]; f(k).classList.toggle('invalid', !!errs[k]); });
+    if (Object.values(errs).some(Boolean)) return;
+    f('cp-save').disabled = true;
+    try {
+      const r = await api('/auth/change-password', { method: 'PUT', body: { current_password: f('cp-old').value, new_password: f('cp-new').value } });
+      closeModal();
+      toast(t(r.message), 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+      f('cp-save').disabled = false;
+    }
+  });
+}
 
 function showError(el, err) {
   el.innerHTML = `<div class="alert alert-error">${esc(err.message || err)}</div>`;

@@ -115,3 +115,12 @@ The demo data also contains about 90 past complaints in six towns so the heatmap
 - Set `AUTO_ESCALATION=false` in `.env` to turn off the background escalation job.
 
 More detail: `docs/ProjectDocumentation.md`, `docs/SRS.md`, `docs/API_Documentation.md`.
+
+## Added: forgot password, change password, duplicate complaints, offline app
+
+- **Forgot password:** Login -> "Forgot password?" emails a link valid for 30 minutes. Put `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USER`, `SMTP_PASS` (Gmail App Password) and optionally `APP_URL` in `backend/.env`. Without SMTP settings the link is printed in the server console.
+- **Change password:** My profile -> "Change password" (admins: key button in the top bar).
+- **Eye button** on every password box shows / hides the password.
+- **Duplicate complaints:** the Report a Fault form offers to join an open complaint of the same fault type within 300 m (last 72 h). 3+ joiners raise the priority. Optional `.env`: `DUP_RADIUS_KM`, `DUP_WINDOW_HOURS`, `DUP_BUMP_AT`.
+- **Offline app (PWA):** installable from the browser; a fault reported without network is saved on the phone (photos too) and sent automatically later. Needs https or localhost.
+- New tables / column are created automatically on server start - do not run `npm run setup-db` on a database with data.

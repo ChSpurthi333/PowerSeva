@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PowerSeva - offline</title>
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f8fc; color: #1b2a3b; margin: 0; display: grid; place-items: center; min-height: 100vh; padding: 24px; text-align: center; }
+    .box { max-width: 420px; background: #fff; border: 1px solid #dde3ea; border-radius: 14px; padding: 32px 24px; }
+    h1 { color: #0a2540; font-size: 1.4rem; margin: 0 0 10px; }
+    a, button { display: inline-block; margin-top: 16px; background: #0b5cad; color: #fff; border: 0; border-radius: 8px; padding: 11px 20px; font-size: 1rem; text-decoration: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>You are offline</h1>
+    <p>This page has not been saved on your phone yet. Pages you have opened before still work, and a fault you report offline is sent automatically when the network returns.</p>
+    <a href="/citizen/report-fault.html">Report a fault</a> <button onclick="location.reload()">Try again</button>
+  </div>
+</body>
+</html>

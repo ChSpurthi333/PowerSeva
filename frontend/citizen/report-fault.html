@@ -6,6 +6,9 @@
   <title>PowerSeva</title>
   <meta name="description" content="PowerSeva - report electricity faults and track every repair.">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0a2540">
+  <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
   <link rel="stylesheet" href="/assets/vendor/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
@@ -29,6 +32,7 @@
               <div class="error-text" id="fault_type_id-err"></div>
             </div>
             <div class="emergency-box hidden" id="emergency-box" role="alert"></div>
+            <div class="dup-box hidden" id="dup-box" role="status"></div>
             <div class="form-group">
               <label for="title" data-i18n="Short title">Short title</label>
               <input id="title" name="title" maxlength="150" data-voice data-i18n-placeholder="For example: No power since morning" placeholder="For example: No power since morning">
@@ -90,5 +94,7 @@
   <script src="/js/complaints.js"></script>
   <script src="/js/citizen.js"></script>
   <script>document.addEventListener('DOMContentLoaded', Citizen.reportFault);</script>
+  <script src="/js/password-toggle.js"></script>
+  <script src="/js/pwa.js"></script>
 </body>
 </html>

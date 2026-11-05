@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const pool = require('../config/db');
 const { httpError, asyncHandler } = require('../middleware/errorMiddleware');
+const { sendMail } = require('../services/mailService');
 const { GMAIL_RE, PHONE_RE, GMAIL_MESSAGE } = require('../utils/validators');
 
 function signToken(user) {
@@ -144,4 +145,70 @@ const google = asyncHandler(async (req, res) => {
   res.json({ token: signToken(user), user: publicUser(user) });
 });
 
-module.exports = { register, login, me, updateProfile, config, google };
+const RESET_MINUTES = 30;
+const hashToken = (tok) => crypto.createHash('sha256').update(tok).digest('hex');
+
+// Forgot password, step 1: the user enters their Gmail. The reply is always the same, so the form cannot be
+// used to find out which emails are registered.
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email || !GMAIL_RE.test(String(email).trim())) throw httpError(400, GMAIL_MESSAGE);
+  const addr = String(email).trim().toLowerCase();
+
+  const [rows] = await pool.query('SELECT user_id, full_name, is_active FROM users WHERE email = ?', [addr]);
+  const user = rows[0];
+  if (user && user.is_active) {
+    const token = crypto.randomBytes(32).toString('hex');
+    await pool.query('DELETE FROM password_resets WHERE user_id = ? OR expires_at < NOW()', [user.user_id]);
+    await pool.query(
+      'INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))',
+      [user.user_id, hashToken(token), RESET_MINUTES]
+    );
+    const base = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const link = `${base}/reset-password.html?token=${token}`;
+    try {
+      await sendMail({
+        to: addr,
+        subject: 'PowerSeva - reset your password',
+        text: `Hello ${user.full_name},\n\nUse this link to choose a new password (valid for ${RESET_MINUTES} minutes):\n${link}\n\nIf you did not ask for this, you can ignore this email - your password will not change.`
+      });
+    } catch (e) {
+      console.error('Could not send reset email:', e.message);
+    }
+  }
+  res.json({ message: 'If this email is registered, a password reset link has been sent. It is valid for 30 minutes.' });
+});
+
+// Forgot password, step 2: the user opens the emailed link and sets a new password
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || typeof token !== 'string') throw httpError(400, 'This reset link is invalid or has expired');
+  if (!password || password.length < 6) throw httpError(400, 'Password must be at least 6 characters');
+
+  const [rows] = await pool.query(
+    'SELECT reset_id, user_id FROM password_resets WHERE token_hash = ? AND used_at IS NULL AND expires_at > NOW()',
+    [hashToken(token)]
+  );
+  if (!rows.length) throw httpError(400, 'This reset link is invalid or has expired');
+
+  const hash = await bcrypt.hash(password, 10);
+  await pool.query('UPDATE users SET password_hash = ? WHERE user_id = ?', [hash, rows[0].user_id]);
+  await pool.query('DELETE FROM password_resets WHERE user_id = ?', [rows[0].user_id]);
+  res.json({ message: 'Password updated. You can now log in.' });
+});
+
+// Logged-in users change their own password (profile page)
+const changePassword = asyncHandler(async (req, res) => {
+  const { current_password, new_password } = req.body;
+  if (!current_password || !new_password) throw httpError(400, 'Enter your current and new password');
+  if (new_password.length < 6) throw httpError(400, 'Password must be at least 6 characters');
+  const [rows] = await pool.query('SELECT password_hash FROM users WHERE user_id = ?', [req.user.id]);
+  if (!rows.length || !(await bcrypt.compare(current_password, rows[0].password_hash))) {
+    throw httpError(400, 'Current password is incorrect');
+  }
+  if (current_password === new_password) throw httpError(400, 'The new password must be different from the current one');
+  await pool.query('UPDATE users SET password_hash = ? WHERE user_id = ?', [await bcrypt.hash(new_password, 10), req.user.id]);
+  res.json({ message: 'Password changed' });
+});
+
+module.exports = { register, login, me, updateProfile, config, google, forgotPassword, resetPassword, changePassword };

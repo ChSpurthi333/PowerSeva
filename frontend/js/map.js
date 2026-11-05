@@ -97,7 +97,9 @@ async function openProfile(onSaved) {
       <div id="pf-map" class="map map-sm"></div>
       <input type="hidden" id="pf-lat" value="${user.latitude ?? ''}"><input type="hidden" id="pf-lng" value="${user.longitude ?? ''}">
     </div>
-    <button class="btn" id="pf-save">${esc(t('Save profile'))}</button>`);
+    <button class="btn" id="pf-save">${esc(t('Save profile'))}</button>
+    <button type="button" class="btn btn-outline" id="pf-pw">&#128273; ${esc(t('Change password'))}</button>`);
+  body.querySelector('#pf-pw').addEventListener('click', () => { closeModal(); openChangePassword(); });
 
   api('/complaints/areas').then((list) => {
     body.querySelector('#pf-areas').innerHTML = list.map((a) => `<option value="${esc(a)}">`).join('');

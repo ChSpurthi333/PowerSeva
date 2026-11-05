@@ -49,6 +49,13 @@ async function changeStatus(conn, complaintId, newStatus, userId, remarks) {
   await notify(conn, citizenId, complaintId,
     `Complaint ${number} update`,
     `Your complaint ${number} ${STATUS_LABELS[newStatus]}.`);
+  // Citizens who joined this complaint ("I have the same problem") get the same updates
+  const [supporters] = await conn.query('SELECT citizen_id FROM complaint_supporters WHERE complaint_id = ?', [complaintId]);
+  for (const sp of supporters) {
+    await notify(conn, sp.citizen_id, complaintId,
+      `Complaint ${number} update`,
+      `The complaint ${number} you joined ${STATUS_LABELS[newStatus]}.`);
+  }
   await refreshEta(conn, complaintId);
 
   return { oldStatus, newStatus };

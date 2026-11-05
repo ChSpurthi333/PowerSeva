@@ -17,6 +17,8 @@ router.get('/receipt/:number', c.receipt);
 // Citizen-only actions
 router.get('/my', authorize('citizen'), c.myComplaints);
 router.post('/assess', authorize('citizen'), c.assessComplaint);
+router.post('/duplicates', authorize('citizen'), c.duplicates);
+router.post('/:id/support', authorize('citizen'), c.support);
 router.post('/', authorize('citizen'), upload.array('images', 5), c.create);
 router.post('/:id/confirm', authorize('citizen'), c.confirm);
 

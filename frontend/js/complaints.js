@@ -125,6 +125,7 @@ function renderComplaintDetail(d) {
       <div class="item"><span>${esc(t('Resolved on'))}</span><b>${fmtDate(c.resolved_at)}</b></div>
       <div class="item"><span>${esc(t('Reported by'))}</span><b>${person(c.citizen_name, c.citizen_phone)}</b></div>
       <div class="item"><span>${esc(t('Department'))}</span><b>${esc(t(c.department_name || '-'))}</b></div>
+      ${Number(c.support_count) ? `<div class="item"><span>${esc(t('Others who reported the same fault'))}</span><b>${Number(c.support_count)}</b></div>` : ''}
     </div>
 
     <div class="section-label">${esc(t('Description'))}</div>

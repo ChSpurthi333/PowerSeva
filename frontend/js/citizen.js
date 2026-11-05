@@ -134,6 +134,55 @@ const Citizen = {
     }
     ['title', 'description'].forEach((id) => document.getElementById(id).addEventListener('input', assess));
 
+    /* --- Duplicate check: the same fault already reported close by? Join it instead of filing again --- */
+    const dupBox = document.getElementById('dup-box');
+    const dismissed = new Set();
+    let dupTimer = null;
+    let dupSeq = 0;
+    const checkDup = () => {
+      clearTimeout(dupTimer);
+      dupTimer = setTimeout(async () => {
+        if (!select.value || !navigator.onLine) { dupBox.classList.add('hidden'); return; }
+        const my = ++dupSeq;
+        try {
+          const list = (await api('/complaints/duplicates', {
+            method: 'POST',
+            body: { fault_type_id: select.value, latitude: document.getElementById('latitude').value, longitude: document.getElementById('longitude').value, area: areaInput.value }
+          })).filter((d) => !dismissed.has(d.complaint_number));
+          if (my !== dupSeq) return;
+          if (!list.length) { dupBox.classList.add('hidden'); return; }
+          dupBox.classList.remove('hidden');
+          dupBox.innerHTML = `<h3>${esc(t('Is this the same fault?'))}</h3>
+            <p>${esc(t('A similar fault was already reported nearby. Joining it gets you every update, and many reports make the repair faster.'))}</p>
+            ${list.map((d) => `<div class="dup-item">
+              <div><b>${esc(d.complaint_number)}</b> - ${esc(d.title)}
+                <div class="muted">${statusBadge(d.current_status)} ${d.distance_m !== null ? esc(t('{n} m away', { n: d.distance_m })) + ' - ' : ''}${esc(t('{n} other(s) also reported', { n: d.support_count }))}</div></div>
+              <div class="dup-actions">
+                ${d.is_own || d.already_supported
+                  ? `<a class="btn btn-sm btn-outline" href="/citizen/track-complaint.html?number=${encodeURIComponent(d.complaint_number)}">${esc(d.is_own ? t('This is my complaint') : t('Already joined - track'))}</a>`
+                  : `<button type="button" class="btn btn-sm" data-join="${d.complaint_id}" data-num="${esc(d.complaint_number)}">${esc(t('Yes, same problem - join'))}</button>`}
+                <button type="button" class="btn btn-sm btn-outline" data-skip="${esc(d.complaint_number)}">${esc(t('No, mine is different'))}</button>
+              </div></div>`).join('')}`;
+        } catch (e) { /* only a helper */ }
+      }, 600);
+    };
+    dupBox.addEventListener('click', async (e) => {
+      const skip = e.target.closest('[data-skip]');
+      if (skip) { dismissed.add(skip.dataset.skip); checkDup(); return; }
+      const join = e.target.closest('[data-join]');
+      if (!join) return;
+      join.disabled = true;
+      try {
+        const r = await api(`/complaints/${join.dataset.join}/support`, { method: 'POST', body: { note: document.getElementById('description').value.slice(0, 255) } });
+        document.getElementById('form-wrap').innerHTML = `
+          <div class="alert alert-success"><h2>${esc(t('You joined the existing complaint'))}</h2><p>${esc(t(r.message))}</p></div>
+          <div class="mt"><a class="btn" href="/citizen/track-complaint.html?number=${encodeURIComponent(r.complaint_number)}">${esc(t('Track this complaint'))}</a>
+          <a class="btn btn-outline" href="/citizen/report-fault.html">${esc(t('Report another fault'))}</a></div>`;
+      } catch (err) { toast(err.message, 'error'); join.disabled = false; }
+    });
+    select.addEventListener('change', checkDup);
+    areaInput.addEventListener('input', checkDup);
+
     // Citizens who signed up with Google have no phone number yet
     const needsPhone = !user.phone;
     document.getElementById('phone-group').classList.toggle('hidden', !needsPhone);
@@ -144,6 +193,7 @@ const Citizen = {
     if (user.latitude && user.longitude && !lat.value) { lat.value = user.latitude; lng.value = user.longitude; }
     const pick = MapKit.picker('fault-map', lat, lng, () => {
       document.getElementById('geo-status').textContent = t('Location captured');
+      checkDup();
     });
     document.getElementById('geo-btn').addEventListener('click', () =>
       MapKit.locate((a, b) => {
@@ -207,6 +257,19 @@ const Citizen = {
           </div>`;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) {
+        if (err.offline && window.PWA) {
+          // No network: keep the complaint (photos too) on this phone and send it automatically later
+          try {
+            const fd = new FormData(e.target);
+            if (!needsPhone) fd.delete('phone');
+            await PWA.queueComplaint(fd);
+            document.getElementById('form-wrap').innerHTML = `
+              <div class="alert alert-warn"><h2>${esc(t('Saved on your phone'))}</h2>
+              <p>${esc(t('There is no network right now. Your complaint will be sent automatically as soon as you are back online. Keep this page or the app installed.'))}</p></div>
+              <div class="mt"><a class="btn btn-outline" href="/citizen/report-fault.html">${esc(t('Report another fault'))}</a></div>`;
+            return;
+          } catch (qe) { /* fall through to the normal error */ }
+        }
         toast(err.message, 'error');
         btn.disabled = false;
         btn.textContent = t('Submit Complaint');
